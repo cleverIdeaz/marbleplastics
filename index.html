@@ -7,25 +7,18 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
-  <!-- The HTML content remains the same as before until the script tag -->
   <div id="marble-pattern-designer-widget">
     <div class="mpd-container">
       <div class="mpd-controls">
         <div class="mpd-quick-actions">
-          <button class="mpd-quick-action-btn" id="mpd-randomizeBtn">
-            <i class="fas fa-random"></i> Randomize
-          </button>
-          <button class="mpd-quick-action-btn" id="mpd-resetBtn">
-            <i class="fas fa-undo"></i> Reset
-          </button>
         </div>
 
         <div class="mpd-control-group">
           <label>Base Material</label>
           <select id="mpd-baseColor">
-            <option value="#F3F3F3">Snow Drift (White)</option>
-            <option value="#353839">Onyx (Black)</option>
-            <option value="#F5DEB3">Natural</option>
+            <option value="#F3F3F3">White</option>
+            <option value="#353839">Black</option>
+            <option value="#EDEAE0">Natural</option>
           </select>
         </div>
 
@@ -34,7 +27,9 @@
         <button id="mpd-addAccent" class="mpd-button mpd-secondary-button">
           <i class="fas fa-plus"></i> Add Accent Color
         </button>
-
+        <button class="mpd-button mpd-secondary-button" id="mpd-randomizeBtn">
+          <i class="fas fa-random"></i> Randomize
+        </button>
         <div class="mpd-action-buttons">
           <a href="mailto:joseph@marbleplastics.com?subject=Quote Request for Custom Pattern" 
              class="mpd-cta-button" id="mpd-getQuoteBtn">
@@ -57,7 +52,6 @@
   </div>
 
   <style>
-    /* The CSS content remains exactly the same as before */
     #marble-pattern-designer-widget {
       --mpd-primary-bg: #121212;
       --mpd-secondary-bg: #1e1e1e;
@@ -124,13 +118,15 @@
     }
 
     .mpd-control-group {
-      margin-bottom: 15px;
+      margin-bottom: 8px;
     }
 
     .mpd-control-group label {
       display: block;
-      margin-bottom: 5px;
+/*      margin-bottom: 5px;*/
       color: var(--mpd-text-primary);
+      font-size: 0.9em;
+      margin-bottom: 3px;
     }
 
     .mpd-preview {
@@ -162,9 +158,9 @@
 
     .mpd-accent-control {
       background: rgba(255, 255, 255, 0.05);
-      padding: 15px;
-      border-radius: 8px;
-      margin-bottom: 10px;
+      padding: 8px;
+      border-radius: 6px;
+      margin-bottom: 6px;
     }
 
     .mpd-accent {
@@ -178,17 +174,39 @@
       text-align: center;
       color: var(--mpd-text-secondary);
     }
+/* Make the scroll area if needed */
+/*    #mpd-accentControls {
+      max-height: 300px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+    }
+        #mpd-accentControls::-webkit-scrollbar-thumb {
+      background-color: rgba(255, 255, 255, 0.2);
+      border-radius: 3px;
+    }
+
+    #mpd-accentControls::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    */
+
 
     #marble-pattern-designer-widget select,
     #marble-pattern-designer-widget button,
     #marble-pattern-designer-widget input {
       width: 100%;
-      padding: 8px;
+      padding: 6px;
       background: var(--mpd-primary-bg);
       border: 1px solid #444;
       border-radius: 4px;
       color: var(--mpd-text-primary);
       cursor: pointer;
+    }
+
+    /* Ensure dropdown options are always visible */
+    #marble-pattern-designer-widget select option {
+      background-color: var(--mpd-primary-bg);
+      color: var(--mpd-text-primary);
     }
 
     #marble-pattern-designer-widget select:hover,
@@ -243,18 +261,58 @@
       background: rgba(255, 0, 0, 0.2);
       color: #ff4444;
     }
+
+    /* Color picker styles */
+    .mpd-color-control {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .mpd-color-control select {
+      flex: 1;
+    }
+
+    .mpd-color-picker-wrapper {
+      position: relative;
+      width: 32px;
+      height: 32px;
+    }
+
+    .mpd-color-picker {
+      position: absolute;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      padding: 0;
+      border: none;
+      cursor: pointer;
+    }
+
+    .mpd-swatch {
+      width: 100%;
+      height: 100%;
+      border: 1px solid #444;
+      border-radius: 4px;
+      padding: 0;
+      cursor: pointer;
+    }
+
+    .mpd-swatch:hover {
+      border-color: var(--mpd-accent-color);
+    }
   </style>
 
   <script>
     const coolColors = {
-      'Cinnabar': '#E34234',
-      'Malachite': '#469496',
-      'Cerulean Frost': '#6D9BC3',
-      'Citrine': '#E4D00A',
-      'Pearly Purple': '#B768A2',
-      'Aquamarine': '#7FFFD4',
-      'Cool Grey': '#8C92AC',
-      'Mango Purée': '#FF6137'
+      'Red': '#E34234',
+      'Green': '#469496',
+      'Blue': '#6D9BC3',
+      'Yellow': '#E4D00A',
+      'Purple': '#B768A2',
+      'Aqua': '#7FFFD4',
+      'Grey': '#8C92AC',
+      'Orange': '#FF6137'
     };
 
     function createAccentControl() {
@@ -271,9 +329,15 @@
       control.innerHTML = `
         <div class="mpd-control-group">
           <label>Accent Color</label>
-          <select class="mpd-accent-color">
-            ${colorOptions}
-          </select>
+          <div class="mpd-color-control">
+            <select class="mpd-accent-color">
+              ${colorOptions}
+            </select>
+            <div class="mpd-color-picker-wrapper">
+              <input type="color" class="mpd-color-picker" value="${Object.values(coolColors)[0]}">
+              <button class="mpd-swatch" style="background-color: ${Object.values(coolColors)[0]}"></button>
+            </div>
+          </div>
         </div>
         <label>Concentration</label>
         <input type="range" class="mpd-concentration-slider" min="0" max="100" value="50">
@@ -282,10 +346,31 @@
 
       const slider = control.querySelector('.mpd-concentration-slider');
       const colorSelect = control.querySelector('.mpd-accent-color');
+      const colorPicker = control.querySelector('.mpd-color-picker');
+      const swatch = control.querySelector('.mpd-swatch');
 
-      [slider, colorSelect].forEach(el => {
-        el.addEventListener('input', updatePreview);
+      // Update swatch when dropdown changes
+      colorSelect.addEventListener('change', (e) => {
+        const selectedColor = e.target.value;
+        colorPicker.value = selectedColor;
+        swatch.style.backgroundColor = selectedColor;
+        updatePreview();
       });
+
+      // Update dropdown and swatch when color picker changes
+      colorPicker.addEventListener('input', (e) => {
+        const selectedColor = e.target.value;
+        swatch.style.backgroundColor = selectedColor;
+        colorSelect.value = selectedColor;
+        updatePreview();
+      });
+
+      // Open color picker when swatch is clicked
+      swatch.addEventListener('click', () => {
+        colorPicker.click();
+      });
+
+      slider.addEventListener('input', updatePreview);
 
       control.querySelector('.mpd-remove-accent').addEventListener('click', () => {
         control.remove();
@@ -298,11 +383,9 @@
     function generateOrganicShape() {
       const points = [];
       const numPoints = 10;
-      const baseRadius = Math.random() * 30 + 15;
-      
       for (let i = 0; i < numPoints; i++) {
         const angle = (i / numPoints) * 2 * Math.PI;
-        const radius = baseRadius * (0.8 + Math.random() * 0.4);
+        const radius = Math.random() * 30 + 15;
         const x = Math.cos(angle) * radius + 50;
         const y = Math.sin(angle) * radius + 50;
         points.push(`${x.toFixed(1)}% ${y.toFixed(1)}%`);
@@ -319,7 +402,8 @@
       previewCanvas.style.backgroundColor = baseColor;
 
       document.querySelectorAll('.mpd-accent-control').forEach(control => {
-        const color = control.querySelector('.mpd-accent-color').value;
+        const colorControl = control.querySelector('.mpd-color-picker');
+        const color = colorControl.value;
         const concentration = control.querySelector('.mpd-concentration-slider').value;
         const particleCount = Math.pow(concentration / 100, 2) * 900;
 
@@ -352,17 +436,49 @@
       const baseColorSelect = document.getElementById('mpd-baseColor');
       const accentControlsContainer = document.getElementById('mpd-accentControls');
       
-      baseColorSelect.value = ['#F3F3F3', '#353839', '#F5DEB3'][Math.floor(Math.random() * 3)];
-      
+      // More varied base color selection
+      const baseColors = [
+        '#F3F3F3', // White
+        '#353839', // Black
+        '#EDEAE0', // Natural
+      ];
+      baseColorSelect.value = baseColors[Math.floor(Math.random() * baseColors.length)];
+
+
+
+
+
+
       accentControlsContainer.innerHTML = '';
-      const numAccents = Math.floor(Math.random() * 2) + 1;
+      const numAccents = Math.floor(Math.random() * 3) + 2; // 1-5 accents
+      
+      const colorNames = Object.keys(coolColors);
+      const usedColors = new Set(); // Prevent duplicate colors
       
       for (let i = 0; i < numAccents; i++) {
         const control = createAccentControl();
         const slider = control.querySelector('.mpd-concentration-slider');
+        const colorSelect = control.querySelector('.mpd-accent-color');
+        const colorPicker = control.querySelector('.mpd-color-picker');
+        const swatch = control.querySelector('.mpd-swatch');
+        
+        // Pick a random unused color
+        let randomColorIndex;
+        do {
+          randomColorIndex = Math.floor(Math.random() * colorNames.length);
+        } while (usedColors.has(randomColorIndex) && usedColors.size < colorNames.length);
+        usedColors.add(randomColorIndex);
+        
+        const selectedColor = coolColors[colorNames[randomColorIndex]];
+        
+        // Update all color-related elements
+        colorSelect.selectedIndex = randomColorIndex;
+        colorPicker.value = selectedColor;
+        swatch.style.backgroundColor = selectedColor;
+        
+        // Randomize concentration
         slider.value = Math.random() * 60 + 20;
-        control.querySelector('.mpd-accent-color').selectedIndex = 
-          Math.floor(Math.random() * Object.keys(coolColors).length);
+        
         accentControlsContainer.appendChild(control);
       }
       
@@ -403,7 +519,7 @@
             .map(point => {
               const [x, y] = point.trim().split(' ').map(v => parseFloat(v));
               return [x * size / 100, y * size / 100];
-});
+            });
           
           ctx.moveTo(points[0][0], points[0][1]);
           points.forEach(([x, y]) => {
@@ -447,24 +563,17 @@
       const accentControlsContainer = document.getElementById('mpd-accentControls');
       const addAccentBtn = document.getElementById('mpd-addAccent');
       const randomizeBtn = document.getElementById('mpd-randomizeBtn');
-      const resetBtn = document.getElementById('mpd-resetBtn');
       const downloadBtn = document.getElementById('mpd-downloadBtn');
 
       baseColorSelect.addEventListener('change', updatePreview);
       addAccentBtn.addEventListener('click', () => {
-        if (document.querySelectorAll('.mpd-accent-control').length < 3) {
+        if (document.querySelectorAll('.mpd-accent-control').length < 5) {  // Increased to 5 accent colors
           accentControlsContainer.appendChild(createAccentControl());
-          updatePreview();
+          updatePreview();  
         }
       });
 
       randomizeBtn.addEventListener('click', randomizeDesign);
-      resetBtn.addEventListener('click', () => {
-        accentControlsContainer.innerHTML = '';
-        accentControlsContainer.appendChild(createAccentControl());
-        baseColorSelect.value = '#F3F3F3';
-        updatePreview();
-      });
       downloadBtn.addEventListener('click', downloadDesign);
 
       // Start with a random design instead of default
